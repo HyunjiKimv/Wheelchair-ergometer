@@ -1,0 +1,3 @@
+numpy>=1.24
+matplotlib>=3.7
+labjackpython>=2.1.0    # hardware interface — omit for simulation-only use
