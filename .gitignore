@@ -1,0 +1,23 @@
+# Test results (generated data)
+results/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# SSH keys (NEVER commit)
+rlaguswl94
+rlaguswl94.pub
+*.pem
+*.key
+id_ed25519
+id_rsa
+
+# Build artifacts
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
