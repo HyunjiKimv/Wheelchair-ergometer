@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/1274117215.svg)](https://doi.org/10.5281/zenodo.20792196)
+
 # Wheelchair Ergometer Control Software
 
 Open-source Python implementation of the ergometer measurement and control platform described in:
