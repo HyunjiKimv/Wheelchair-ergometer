@@ -1,4 +1,7 @@
-[![DOI](https://zenodo.org/badge/1274117215.svg)](https://doi.org/10.5281/zenodo.20792196)
+[![DOI](https://zenodo.org/badge/1274117215.svg)](https://doi.org/10.5281/zenodo.20792196
+        
+        )
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Wheelchair Ergometer Control Software
