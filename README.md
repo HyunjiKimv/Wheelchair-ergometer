@@ -1,5 +1,7 @@
 [![DOI](https://zenodo.org/badge/1274117215.svg)](https://doi.org/10.5281/zenodo.20792196
         
+        
+        
         )
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,7 +12,6 @@ Open-source Python implementation of the ergometer measurement and control platf
 
 > Kim H. *et al.* "A Detachable Measurement and Control Platform for Wheelchair Ergometers." *Journal of NeuroEngineering and Rehabilitation* (2026).
 
-Replaces the original MATLAB implementation. No additional toolboxes are required.
 
 ---
 
