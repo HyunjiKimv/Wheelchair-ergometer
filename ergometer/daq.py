@@ -124,11 +124,11 @@ class ErgometerDAQ:
         # Power = T [N·m] × ω [rad/s]   (T in kgf·cm → N·m: ×9.8×0.01)
         omega_L  = rpm_L * 2 * math.pi / 60
         omega_R  = rpm_R * 2 * math.pi / 60
-        power_L  = torque_L * 9.8 * 0.01 * omega_L   # W  (torque still kgf·cm here)
-        power_R  = torque_R * 9.8 * 0.01 * omega_R
+        power_L  = torque_L * omega_L   # W
+        power_R  = torque_R * omega_R
 
         return {
-            "torque_L": torque_L,  # kgf·cm
+            "torque_L": torque_L,  # N·m
             "rpm_L":    rpm_L,
             "power_L":  power_L,
             "torque_R": torque_R,
