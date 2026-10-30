@@ -54,7 +54,10 @@ class ErgometerDAQ:
             firstFound=False,
             serial=self._pins["output_serial"]
         )
-
+        # LJTick-DAC is a bipolar (approximately -10 to +10 V) device.
+        # Read each channel's factory calibration before writing any output.
+        self._tdac_cal = self._read_tdac_calibration()
+        
         # Input DAQ: FIO0-3 as analog inputs
         self._input_device.configIO(FIOAnalog=0x0F)
 
@@ -139,8 +142,10 @@ class ErgometerDAQ:
     def set_brake_voltage(self, voltage: float) -> None:
         """Output voltage [0–10 V] to both DACA and DACB of LJTick-DAC."""
         voltage = max(0.0, min(self._cal["max_voltage"], voltage))
+        log.info("Brake → %.3f V", voltage)
         
         if self._output_device is None:
+            log.info("  (simulation — no hardware output)")
             return  # simulation
         
         self._tdac_set(channel=0, voltage=voltage)  # DACA → left brake
@@ -170,6 +175,36 @@ class ErgometerDAQ:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+    def _read_tdac_calibration(self) -> tuple[tuple[float, float], tuple[float, float]]:
+        """Read DACA/DACB slope and offset from LJTick-DAC EEPROM (signed 32.32)."""
+        result = self._output_device.i2c(
+            0x50, [64], NumI2CBytesToReceive=36,
+            SDAPinNum=self._pins["tdac_sda_pin"],
+            SCLPinNum=self._pins["tdac_scl_pin"],
+        )
+        data = result["I2CBytes"]
+        if len(data) < 32:
+            raise RuntimeError("LJTick-DAC EEPROM returned incomplete calibration data")
+
+        def fixed32_32(start: int) -> float:
+            fractional, integer = struct.unpack("<Ii", bytes(data[start:start + 8]))
+            return integer + fractional / 2**32
+
+        channels = (
+            (fixed32_32(0), fixed32_32(8)),
+            (fixed32_32(16), fixed32_32(24)),
+        )
+        for channel, (slope, offset) in enumerate(channels):
+            if (not math.isfinite(slope) or not math.isfinite(offset)
+                    or slope <= 0 or offset < 0
+                    or offset + self._cal["max_voltage"] * slope > 65535):
+                raise RuntimeError(
+                    f"Invalid LJTick-DAC calibration for channel {channel}: "
+                    f"slope={slope}, offset={offset}"
+                )
+        log.info("LJTick-DAC factory calibration loaded for DACA and DACB")
+        return channels
+        
     def _read_raw(self) -> dict:
         if self._input_device is None:
             return self._simulate_raw()
@@ -193,17 +228,34 @@ class ErgometerDAQ:
         LJTick-DAC uses TLV5618 12-bit DAC via I²C.
         With an external 10 V reference the output spans 0–10 V.
         """
-        dac_val = int(voltage / self._cal["max_voltage"] * 4095)
-        dac_val = max(0, min(4095, dac_val))
-        msb = (dac_val >> 4) & 0xFF
-        lsb = (dac_val & 0x0F) << 4
-        reg_byte = 0x00 if channel == 0 else 0x10
-        self._output_device.i2c(
-            self._pins["tdac_address"],
-            [reg_byte, msb, lsb],
-            SDAPinNum=self._pins["tdac_sda_pin"],
-            SCLPinNum=self._pins["tdac_scl_pin"],
+        if self._tdac_cal is None:
+            raise RuntimeError("LJTick-DAC calibration has not been loaded")
+        slope, offset = self._tdac_cal[channel]
+        dac_val = max(0, min(65535, round(voltage * slope + offset)))
+        msb = (dac_val >> 8) & 0xFF
+        lsb = dac_val & 0xFF
+        # LJTick-DAC I2C protocol: 0x30 = write DACA, 0x31 = write DACB
+        cmd = 0x30 if channel == 0 else 0x31
+        log.debug(
+            "TDAC ch%d: %.3f V → count=%d  cmd=0x%02X  bytes=[0x%02X, 0x%02X]",
+            channel, voltage, dac_val, cmd, msb, lsb,
         )
+        try:
+            self._output_device.i2c(
+                self._pins["tdac_address"],
+                [cmd, msb, lsb],
+                SDAPinNum=self._pins["tdac_sda_pin"],
+                SCLPinNum=self._pins["tdac_scl_pin"],
+            )
+        except Exception as e:
+            log.warning("TDAC I2C error ch%d (%.3f V): %s — retrying", channel, voltage, e)
+            time.sleep(0.005)
+            self._output_device.i2c(
+                self._pins["tdac_address"],
+                [cmd, msb, lsb],
+                SDAPinNum=self._pins["tdac_sda_pin"],
+                SCLPinNum=self._pins["tdac_scl_pin"],
+            )
 
     @staticmethod
     def _simulate_raw() -> dict:
