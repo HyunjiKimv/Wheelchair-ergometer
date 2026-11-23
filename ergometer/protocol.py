@@ -219,7 +219,7 @@ class WingateProtocol:
                 stage_num=trial, stage_total=n_trials,
             )
             total_torque = raw["torque_L"] + raw["torque_R"]
-            fiso = float(np.max(total_torque) * 9.8 * 0.01)  # kgf·cm → N·m
+            fiso = float(np.max(total_torque))  # N·m
             fiso_values.append(fiso)
             print(f"  Trial {trial} Fiso: {fiso:.2f} N·m")
 
