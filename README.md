@@ -6,7 +6,7 @@
 
 Open-source Python implementation of the ergometer measurement and control platform described in:
 
-> Kim H. *et al.* "A Detachable Measurement and Control Platform for Wheelchair Ergometers." *Journal of NeuroEngineering and Rehabilitation* (2026).
+> Kim H. *et al.* "Development and Technical Evaluation of a Detachable Instrumentation and Resistance-Control Module for Wheelchair Roller Ergometers." *Journal of NeuroEngineering and Rehabilitation* (2026).
 
 
 ---
