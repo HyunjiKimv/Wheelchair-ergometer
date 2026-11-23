@@ -2,6 +2,8 @@
         
         
         
+        
+        
         )
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -23,7 +25,7 @@ Open-source Python implementation of the ergometer measurement and control platf
 | DAC (brake control) | LJTick-DAC (FIO4/FIO5, address 0x12) |
 | Torque sensor | RSCR RI-50W (500 kgf·cm / 10 V) |
 | RPM encoder | 1000 RPM / 10 V analog output |
-| Brake | PORA PRB-5Y4 powder brake |
+| Brake | PORA PRB-2.5Y4 powder brake |
 
 Wiring: AIN0 = torque L, AIN1 = RPM L, AIN2 = torque R, AIN3 = RPM R.
 
